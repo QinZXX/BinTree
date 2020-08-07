@@ -1,128 +1,56 @@
-#include <iostream>
+/**
+ * C++ : AVL树
+ * @author QinZXX
+ * @date 2020/08/07
+ */
 
+#include <iostream>
+#include "avlTree.h"
 using namespace std;
 
-#define DataType int
-
-/*定义AVL树的节点*/
-typedef struct AvlNode{
-    DataType    data;
-    AvlNode    * m_pLeft;
-    AvlNode    * m_pRight;
-    int height;
-}*AvlTree,*Position,AvlNode;
-
-int Max(int a,int b){
-    return a>b?a:b;
-}
-//求树的高度
-int Height( AvlTree T){
-    return nullptr==T? -1:T->height;
-}
-
-//单旋转右旋  LL
-AvlTree singleRotateWithRight(AvlTree T){
-    AvlTree L = T->m_pLeft;
-    T->m_pLeft = L->m_pRight;
-    L->m_pRight = T;
-    T->height = Max( Height(T->m_pLeft),Height(T->m_pRight) ) + 1;
-    L->height = Max( Height(L->m_pLeft),Height(L->m_pRight) ) + 1;
-    return L;    //此时L成为根节点了
-}
-//单旋转左旋  RR
-AvlTree singleRotateWithLeft(AvlTree T){
-    AvlTree R = T->m_pRight;
-    T->m_pRight = R->m_pLeft;
-    R->m_pLeft = T;
-    T->height = Max( Height(T->m_pLeft),Height(T->m_pRight) ) + 1;
-    R->height = Max( Height(R->m_pLeft),Height(R->m_pRight) ) + 1;
-    return R;    //此时R成为根节点了（可参考AVL的插入的左左情况的左旋图）
-}
-//双旋转，先左后右  LR
-AvlTree doubleRotateWithLeft(AvlTree T)     {  //先左后右
-    T->m_pLeft = singleRotateWithLeft(T->m_pLeft);
-    return singleRotateWithRight(T);
-}
-//双旋转，先右后左  RL
-AvlTree doubleRotateWithRight(AvlTree T)   { //先右后左
-    T->m_pRight = singleRotateWithRight(T->m_pRight);
-    return singleRotateWithLeft(T);
-}
-AvlTree AvlTreeInsert(AvlTree T, DataType x){
-    if(T == nullptr)  {  //如果树为空
-        if(T = (AvlNode *)malloc(sizeof(AvlNode))) {
-            T->data = x;
-            T->m_pLeft  = nullptr;
-            T->m_pRight = nullptr;
-            T->height = 0;
-        }
-        else{
-            cout << "Out of memory!" << endl;
-            exit(0);
-        }
-    }
-    else if( x < T->data)     {   //如果插入到T结点的左子树上
-        T->m_pLeft = AvlTreeInsert(T->m_pLeft,x);    //先插入，后旋转
-        if(Height(T->m_pLeft) - Height(T->m_pRight) == 2)  {//
-            if(x < T->m_pLeft->data)     {   //左左情况，只需要右旋转
-                T = singleRotateWithRight( T );
-            }
-            else                   {         //左右情况，双旋转,先左
-                T = doubleRotateWithLeft( T );
-            }
-        }
-    }
-    else if( x > T->data ){
-        T->m_pRight = AvlTreeInsert(T->m_pRight,x);
-        if(Height(T->m_pRight) - Height(T->m_pLeft) == 2)
-        {
-            if(x > T->m_pRight->data)   {     //右右情况，进行左旋
-                T = singleRotateWithLeft( T );
-            }
-            else                 {           //左右情况，双旋转,先右
-                T = doubleRotateWithRight( T );
-            }
-        }
-    }
-    //如果这个数已经存在，那么不进行插入
-    T->height = Max(Height(T->m_pLeft),Height(T->m_pRight)) + 1;
-    return T;
-}
-//递归实现中序遍历
-void inOrderVisitUseRecur(const AvlTree pCurrent){
-    if(pCurrent){
-        inOrderVisitUseRecur(pCurrent->m_pLeft);
-        cout << pCurrent->data << " ";
-        if(pCurrent->m_pLeft)
-            cout << " leftChild: "<<pCurrent->m_pLeft->data;
-        else
-            cout << " leftChild: "<<"nullptr" ;
-        if(pCurrent->m_pRight)
-            cout << " rightChild: "<<pCurrent->m_pRight->data;
-        else
-            cout << " rightChild: "<< "nullptr";
-        cout << endl;
-        inOrderVisitUseRecur(pCurrent->m_pRight);
-    }
-}
+static int arr[]= {3,2,1,4,5,6,7,16,15,14,13,12,11,10,8,9};
+#define TBL_SIZE(a) ( (sizeof(a)) / (sizeof(a[0])) )
 
 int main(){
-    AvlTree root = nullptr;
-    root = AvlTreeInsert(root,1);
-    root = AvlTreeInsert(root,2);
-    root = AvlTreeInsert(root,3);
-    root = AvlTreeInsert(root,4);
-    root = AvlTreeInsert(root,5);
-    root = AvlTreeInsert(root,6);
-    root = AvlTreeInsert(root,7);
-    root = AvlTreeInsert(root,8);
-    root = AvlTreeInsert(root,9);
-    root = AvlTreeInsert(root,10);
-    root = AvlTreeInsert(root,11);
-    root = AvlTreeInsert(root,12);
-    root = AvlTreeInsert(root,13);
-    root = AvlTreeInsert(root,14);
-    root = AvlTreeInsert(root,15);
-    inOrderVisitUseRecur(root);
+    int i,ilen;
+    AVLTree<int>* tree=new AVLTree<int>();
+
+    cout << "== 依次添加: ";
+    ilen = TBL_SIZE(arr);
+    for(i=0; i<ilen; i++)
+    {
+        cout << arr[i] <<" ";
+        tree->insert(arr[i]);
+    }
+
+    cout << "\n== 前序遍历: ";
+    tree->preOrder();
+
+    cout << "\n== 中序遍历: ";
+    tree->inOrder();
+
+    cout << "\n== 后序遍历: ";
+    tree->postOrder();
+    cout << endl;
+
+    cout << "== 高度: " << tree->height() << endl;
+    cout << "== 最小值: " << tree->minimum() << endl;
+    cout << "== 最大值: " << tree->maximum() << endl;
+    cout << "== 树的详细信息: " << endl;
+    tree->print();
+
+    i = 8;
+    cout << "\n== 删除根节点: " << i;
+    tree->remove(i);
+
+    cout << "\n== 高度: " << tree->height() ;
+    cout << "\n== 中序遍历: " ;
+    tree->inOrder();
+    cout << "\n== 树的详细信息: " << endl;
+    tree->print();
+
+    // 销毁二叉树
+    tree->destroy();
+
     return 0;
 }
